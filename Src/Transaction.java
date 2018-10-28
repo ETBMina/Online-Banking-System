@@ -1,12 +1,12 @@
 public class Transaction {
 
     private int source ;
-    private int destantion ;
+    private int destination ;
     private int value ;
 
     public Transaction(int source, int destantion, int value) {
         this.source = source;
-        this.destantion = destantion;
+        this.destination = destantion;
         this.value = value;
     }
 
@@ -20,11 +20,11 @@ public class Transaction {
     }
 
     public int getDestantion() {
-        return destantion;
+        return destination;
     }
 
     public void setDestantion(int destantion) {
-        this.destantion = destantion;
+        this.destination = destantion;
     }
 
     public int getValue() {
@@ -37,21 +37,21 @@ public class Transaction {
     public String toString ()
     {
         String Print_Stirng = "";
-        if (source==destantion)
+        if (source==destination)
             if (value>0)
                 Print_Stirng =" "+ Integer.toString(value) + " was  Deposited into Account NO = " + Integer.toString(source)  + " ";
             else
                 Print_Stirng =" "+ Integer.toString((value*-1)) + " was  Withdrawn from Account NO = " + Integer.toString(source)  + " ";
         else
-           if (value>0)
-            Print_Stirng =" "+ Integer.toString(value) + " was  Deposited into Account NO = " + Integer.toString(destantion)
-            + " from account No = "    +Integer.toString(source)+" "
+        if (value>0)
+            Print_Stirng =" "+ Integer.toString(value) + " was  Deposited into Account NO = " + Integer.toString(destination)
+                    + " from account No = "    +Integer.toString(source)+" "
                     ;
         else
-               Print_Stirng =" "+ Integer.toString((value*-1)) + " was  Deposited into Account NO = " + Integer.toString(source)
-                       + " from account No = "    +Integer.toString(destantion)+" ";
+            Print_Stirng =" "+ Integer.toString((value*-1)) + " was  Deposited into Account NO = " + Integer.toString(source)
+                    + " from account No = "    +Integer.toString(destination)+" ";
 
-      return  Print_Stirng;
+        return  Print_Stirng;
 
 
     }
