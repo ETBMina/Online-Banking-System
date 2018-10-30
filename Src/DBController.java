@@ -2,12 +2,9 @@ package com.company;
 
 import java.sql.*;
 
+enum statusLogin {WRONGID, WRONGPASSWORD, CORRECT}
 
 public class DBController {
-    public static final int WRONGID = 0;
-    public static final int WRONGPASSWORD = 1;
-    public static final int CORRECT = 2;
-
     public static Connection createConnection() {
         Connection connection = null;
         try {
@@ -64,63 +61,55 @@ public class DBController {
     }
 
 
-
-    public static int login(Account account) throws SQLException {
-        PreparedStatement idPreparedStatement = null, passwordPreparedStatement = null;
-        ResultSet idResutlRet = null, passwordResultSet = null;
+    public static statusLogin login(Account account, Connection con, Statement stmt) {
+        PreparedStatement idPreparedStatement = null;
+        ResultSet idResutlRet = null;
         String idQuery = "SELECT * FROM Bank WHERE ID = ?";
-        String passwordQuery = "SELECT * FROM Bank WHERE PASSWORD = ?";
         try {
-            // Create connection
-            Connection con = createConnection();
             // Make idQuery as prepared statement
             idPreparedStatement = con.prepareStatement(idQuery);
-            passwordPreparedStatement = con.prepareStatement(passwordQuery);
             // replace the first Question Mark ?
             idPreparedStatement.setInt(1, account.getUser_id());
-            passwordPreparedStatement.setInt(1, account.getPassword());
             // Execute the query
             idResutlRet = idPreparedStatement.executeQuery();
-            passwordResultSet = passwordPreparedStatement.executeQuery();
-            if (!idResutlRet.next())
-                return DBController.WRONGID;
-            else if (!passwordResultSet.next())
-                return DBController.WRONGPASSWORD;
-            else
-                return DBController.CORRECT;
+
+            if (!idResutlRet.next()) {
+                return statusLogin.WRONGID;
+            }
+            else {
+                int sqlPassword=idResutlRet.getInt(3);
+                if (account.getPassword() != sqlPassword)
+                    return statusLogin.WRONGPASSWORD;
+                else
+                   return statusLogin.CORRECT;
+            }
+
+
         } catch (SQLException e) {
             e.printStackTrace();
-        } finally {
-            idPreparedStatement.close();
-            passwordPreparedStatement.close();
-            idResutlRet.close();
-            passwordResultSet.close();
         }
-        return 0;
+        // Default
+        return statusLogin.WRONGID;
     }
+
 
     public static void addToHistory(Transaction transaction) {
         return;
     }
 
-    public static String viewHistory(Account account) throws SQLException {
+    public static String viewHistory(Account account,Connection con) throws SQLException {
         PreparedStatement idPreparedStatement = null;
         ResultSet idResutlRet = null;
         String idQuery = "SELECT * FROM History WHERE ID = ?";
-        // Create connection
-        Connection con = createConnection();
         // Make idQuery as prepared statement
         idPreparedStatement = con.prepareStatement(idQuery);
         // Set ID Value
         idPreparedStatement.setInt(1, account.getUser_id());
 
         idResutlRet = idPreparedStatement.executeQuery();
-        String string=new String();
-        while(idResutlRet.next()) {
-           /* string+=(idResutlRet.getString(1) + "\t" +
-                    idResutlRet.getString(2) + "\t" +
-                    idResutlRet.getInt(3) + "\t" +
-                    idResutlRet.getInt(4)+"\n");*/
+        String string = new String();
+        while (idResutlRet.next()) {
+            string += (idResutlRet.getString(1) + "\n");
         }
         return string;
     }

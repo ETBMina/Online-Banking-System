@@ -18,13 +18,13 @@ public class test {
         register(new Account("Ahmed",123,125), stm);
 
 
-        Account loginAccount = new Account("Ahmed",1223,123456);
-        loginAccount.setUser_id(1);
-        if(0==login(loginAccount))
+        Account loginAccount = new Account("Ahmed",122,123456);
+        loginAccount.setUser_id(515);
+        if(statusLogin.WRONGID==login(loginAccount,con,stm))
             System.out.println("Wrong id");
-        if(1==login(loginAccount))
+        else if(statusLogin.WRONGPASSWORD==login(loginAccount,con,stm))
             System.out.println("Wrong Password");
+        else System.out.println("CORRECT");
         System.out.println("AccountID : "+loginAccount.getUser_id());
-        System.out.println(login(loginAccount));
     }
 }
