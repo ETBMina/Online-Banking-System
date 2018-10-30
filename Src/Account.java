@@ -1,12 +1,15 @@
-public class Account {
+package com.company;
+
+import java.io.Serializable;
+
+public class Account implements Serializable {
 
     private int user_id;
     private int password;
     private int balance ;
     private  String full_name ;
 
-    public Account(int user_id, int password, int balance, String full_name) {
-        this.user_id = user_id;
+    public Account(String full_name, int password, int balance) {
         this.password = password;
         this.balance = balance;
         this.full_name = full_name;
@@ -45,55 +48,52 @@ public class Account {
     }
 
 
-    public boolean edit (Account source , int value )
+    public boolean editBalance (Account source , int value )
     {
         if (source==this)
         {
             if (value>0)
-        {
-            balance+=value ;
-            return true;
-        }
-        else
-        {
-
-            if(balance>(value*-1))
             {
-                balance -= (value*-1);
+                balance+=value ;
                 return true;
             }
             else
-                return false;
-        }
-        }
-        else
             {
-                if (value>0)
-                {
-                    if (source.balance>value)
-                    {
-                        source.balance-=value;
-                        this.balance+=value;
-                        return true;
-                    }
-                    else
-                        return false;
 
+                if(balance>(value*-1))
+                {
+                    balance -= (value*-1);
+                    return true;
                 }
                 else
-                if (this.balance>(value*-1))
+                    return false;
+            }
+        }
+        else
+        {
+            if (value>0)
+            {
+                if (source.balance>value)
                 {
-                    this.balance-=value;
-                    source.balance+=value;
+                    source.balance-=value;
+                    this.balance+=value;
                     return true;
                 }
                 else
                     return false;
 
             }
+            else
+            if (this.balance>(value*-1))
+            {
+                this.balance-=value;
+                source.balance+=value;
+                return true;
+            }
+            else
+                return false;
+
+        }
 
     }
 }
-
-
-
