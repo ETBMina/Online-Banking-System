@@ -1,6 +1,8 @@
 package com.company;
 
 import java.sql.*;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 public class DBController {
     public static Connection createConnection() {
@@ -59,7 +61,23 @@ public class DBController {
         return 0;
     }
 
-    public static void addToHistory(Transaction transaction ){
+    public static void addToHistory(Transaction transaction )
+    {
+        Statement stmt= createStatement(createConnection());
+        String SQL="CREATE TABLE IF NOT EXISTS History " +
+                "(ID INTEGER PRIMARY KEY AUTOINCREMENT," +
+                "DESCRIPTION TEXT NOT NULL )";
+        String timeStamp = new SimpleDateFormat("yyyy/MM/dd_HH:mm:ss").format(Calendar.getInstance().getTime());
+        String transactionDescription=timeStamp+" ::"+transaction.toString();
+
+        try {
+            stmt.execute(SQL);
+            SQL="INSERT INTO History(DESCRIPTION) " +
+                    "VALUES ('"+transactionDescription+"')";
+            stmt.execute(SQL);
+        } catch (SQLException e) {
+            System.out.println("Cannot Add Transaction To History " + e.getMessage());
+        }
         return;
     }
     public static String viewHistory(Account account){
