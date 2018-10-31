@@ -75,13 +75,14 @@ public class DBController {
 
             if (!idResutlRet.next()) {
                 return statusLogin.WRONGID;
-            }
-            else {
-                int sqlPassword=idResutlRet.getInt(3);
-                if (account.getPassword() != sqlPassword)
+            } else {
+                if (account.getPassword() !=  idResutlRet.getInt(3))
                     return statusLogin.WRONGPASSWORD;
-                else
-                   return statusLogin.CORRECT;
+                else {
+                    account.setFull_name(idResutlRet.getString(2));
+                    account.setBalance(idResutlRet.getInt(4));
+                    return statusLogin.CORRECT;
+                }
             }
 
 
@@ -97,7 +98,7 @@ public class DBController {
         return;
     }
 
-    public static String viewHistory(Account account,Connection con) throws SQLException {
+    public static String viewHistory(Account account, Connection con) throws SQLException {
         PreparedStatement idPreparedStatement = null;
         ResultSet idResutlRet = null;
         String idQuery = "SELECT * FROM History WHERE ID = ?";
