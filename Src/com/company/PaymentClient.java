@@ -1,9 +1,6 @@
 package com.company;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.net.Socket;
 import java.util.Scanner;
 
@@ -12,36 +9,41 @@ public class PaymentClient
 
     public static void main(String[] args)
     {
+
         try
         {
-            Account account=new Account("Ahmed",123,125);
+            //connect
+            //create socket
             Scanner sc = new Scanner(System.in);
-            //1.connect
-            //2. create socket
             Socket c = new Socket("127.0.0.1", 1234);
-            ObjectOutputStream os=new ObjectOutputStream(c.getOutputStream());
-           /* DataOutputStream dos = new DataOutputStream(c.getOutputStream());
-            DataInputStream dis = new DataInputStream(c.getInputStream());*/
 
-            //3. perform IO
+            ObjectOutputStream os = new ObjectOutputStream(c.getOutputStream());
+            ObjectInputStream  is = new ObjectInputStream (c.getInputStream()) ;
+            //perform IO
             while (true)
             {
-                //String servermsg = dis.readUTF();
-                //System.out.println(servermsg);
+                Account account=new Account("Ahmed",123,125);
                 String userresp = sc.nextLine();
                 os.writeObject(account);
                 if(userresp.equalsIgnoreCase("N"))
                     break;
             }
-
-            //4.close comm
+            //close comm
             os.close();
-           // dis.close();
+            is.close();
+            //close socket for client
             c.close();
-        } catch (IOException ex)
+        }
+        catch (IOException ex)
         {
-
+            System.out.println("wrong input ");
         }
     }
+
+
+
+
+
+
 
 }

@@ -2,20 +2,23 @@ package com.company;
 
 public class Packet {
 
+    enum command {REGISTER, LOGIN, LOGOUT, BALANCE, OPERATION};
+
     private Account account;
     private Transaction transaction;
+    private  command command ;
 
-    private enum command {REGISTER, LOGIN, LOGOUT, BALANCE, OPERATION};
-
-    public Packet(Account account, Transaction transaction) {
+    public Packet(Account account, Transaction transaction, Packet.command command) {
         this.account = account;
         this.transaction = transaction;
+        this.command = command;
     }
 
-    public Account getAccount() {
+    public Packet.command getCommand() { return command; }
 
-        return account;
-    }
+    public void setCommand(Packet.command command) { this.command = command; }
+
+    public Account getAccount() { return account; }
 
     public void setAccount(Account account) {
         this.account = account;
@@ -28,11 +31,6 @@ public class Packet {
     public void setTransaction(Transaction transaction) {
         this.transaction = transaction;
     }
-
-
-
-
-
 }
 
 

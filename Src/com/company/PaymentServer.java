@@ -11,59 +11,66 @@ public class PaymentServer
     {
         try
         {
-            //1.Listen 
-            //2.accept
-            //3.create socket (I/O) with client
+            //create socket
             ServerSocket s = new ServerSocket(1234);
+            // number of clients
+            int n = 1 ;
+
+            System.out.println("the server is ready to accept customers ");
+
             while (true)
             {
                 Socket c = s.accept();
-                System.out.println("Client Arrived");
-                /*DataOutputStream dos = new DataOutputStream(c.getOutputStream());
-                DataInputStream dis = new DataInputStream(c.getInputStream());*/
-                ObjectOutputStream os=new ObjectOutputStream(c.getOutputStream());
-                ObjectInputStream is=new ObjectInputStream(c.getInputStream());
-                Account account;
-                //4.perform IO with client
-                while (true)
-                {
-                    account=(Account)is.readObject();
-                    System.out.println(account.getBalance());
-                  /*  dos.writeUTF("Hello enter account num:");
-                    String accnum = dis.readUTF();
-                    //check using accnum in DB
-                    dos.writeUTF("Account num :"+accnum+ "is valid"
-                            + "enter password ");
-                    String pass = dis.readUTF();
-                    //check using accnum and pass in DB
-                    dos.writeUTF("Account num :"+accnum+ "and pass:"
-                            +pass+"are valid enter payment ");
-                    String payment = dis.readUTF();
-                    //check if balance is enough
-                    dos.writeUTF("Payment = "+ payment + "is successfull"
-                            + "do you want to perform another y/n?");
-                    
-                    String userChoice = dis.readUTF();
-                    if(userChoice.equalsIgnoreCase("N"))
-                        break;
-                    */
-                }
-
-                //5. close comm with client
-               /* dos.close();
-                dis.close();*/
-
-
+                System.out.println("Client Arrived N.O." + n);
+                ClientHandler ch = new ClientHandler(c);
+                //handle client in parrallel
+                Thread t = new Thread(ch);
+                t.start();
+                //create new light weight process
+                //and run in parallel and the main thread
+                //continues
+                n++;
             }
-
             //s.close();
-        } catch (IOException ex)
-        {
-            System.out.println("Something went wrong");
-        } catch (ClassNotFoundException e) {
+        }
+        catch (IOException e) {
             e.printStackTrace();
         }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     }
+
+
+    public static void connectToOtherServer()
+    {
+
+    }
+    public static boolean sendPacketToOtherServerAndGetResponse( Transaction trans )
+    {
+
+        return true ;
+    }
+
+
+
+
 
 }

@@ -3,7 +3,8 @@ package com.company;
 import java.sql.*;
 
 public class DBController {
-    public static Connection createConnection() {
+
+    public static synchronized Connection createConnection() {
         Connection connection = null;
         try {
             connection = DriverManager.getConnection("jdbc:sqlite:testjava.db");
@@ -12,7 +13,8 @@ public class DBController {
         }
         return connection;
     }
-    public static Statement createStatement(Connection connection) {
+
+    public static synchronized Statement createStatement(Connection connection) {
         Statement stmt = null;
         try {
             stmt  = connection.createStatement();
@@ -21,21 +23,22 @@ public class DBController {
         }
         return stmt;
     }
-    public static boolean register (com.company.Account account, Statement stmt) {
+
+    public static synchronized boolean register (Account account,Statement stmt) {
         try {
 
-            String sql = "CREATE TABLE IF NOT EXISTS Accounts " +
+            String sql = "CREATE TABLE IF NOT EXISTS Bank " +
                     "(ID INTEGER PRIMARY KEY     AUTOINCREMENT," +
                     " NAME           TEXT    NOT NULL, " +
                     " PASSWORD       INT     NOT NULL, " +
                     " BALANCE        INT     NOT NULL)";
             stmt.execute(sql);
 
-            sql = "INSERT INTO Accounts (NAME,PASSWORD,BALANCE) " +
+            sql = "INSERT INTO BANK (NAME,PASSWORD,BALANCE) " +
                     "VALUES ('"+account.getFull_name()+"' , '"+
                     Integer.toString(account.getPassword()) +"' , '"+
                     Integer.toString(account.getBalance())+"')";
-            ResultSet rs = stmt.executeQuery( "SELECT * FROM Accounts WHERE NAME='"+
+            ResultSet rs = stmt.executeQuery( "SELECT * FROM Bank WHERE NAME='"+
                     account.getFull_name()+"' AND PASSWORD='"+
                     Integer.toString(account.getPassword())+"' AND BALANCE='"+
                     Integer.toString(account.getBalance())+"'");
@@ -55,27 +58,31 @@ public class DBController {
 
 
     }
-    public static int login(Account account){
+
+    public static synchronized int login(Account account){
         return 0;
     }
 
-    public static void addToHistory(Transaction transaction ){
+    public static synchronized void addToHistory(Transaction transaction ){
         return;
     }
-    public static String viewHistory(Account account){
+
+    public static synchronized String viewHistory(Account account){
         return "okay";
     }
-    public synchronized static void editBalance(com.company.Account account)
-    {
-        int newBalance=account.getBalance();
-        Statement stmt= createStatement(createConnection());
-        String SQL="UPDATE Accounts SET BALANCE = '"+Integer.toString(account.getBalance())+"' "+ "WHERE ID ="+Integer.toString(account.getUser_id());
-        try {
-            stmt.execute(SQL);
-        } catch (SQLException e) {
-            System.out.println("Something went wrong: " + e.getMessage());
-        }
 
+    public static synchronized void editBalance(Account account){
         return;
+    }
+
+    public static synchronized Account readAccount ( int id)
+    {
+        Account he = new Account("mina", 13 ,13);
+        return he;
+
+    }
+    public  static  synchronized boolean doesAccountExist ( int id){
+
+        return false ;
     }
 }
