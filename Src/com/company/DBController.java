@@ -57,9 +57,38 @@ public class DBController {
 
 
     }
-    public static int login(Account account){
-        return 0;
+    public static statusLogin login(Account account, Connection con, Statement stmt) {
+        PreparedStatement idPreparedStatement = null;
+        ResultSet idResutlRet = null;
+        String idQuery = "SELECT * FROM Bank WHERE ID = ?";
+        try {
+            // Make idQuery as prepared statement
+            idPreparedStatement = con.prepareStatement(idQuery);
+            // replace the first Question Mark ?
+            idPreparedStatement.setInt(1, account.getUser_id());
+            // Execute the query
+            idResutlRet = idPreparedStatement.executeQuery();
+
+            if (!idResutlRet.next()) {
+                return statusLogin.WRONGID;
+            } else {
+                if (account.getPassword() !=  idResutlRet.getInt(3))
+                    return statusLogin.WRONGPASSWORD;
+                else {
+                    account.setFull_name(idResutlRet.getString(2));
+                    account.setBalance(idResutlRet.getInt(4));
+                    return statusLogin.CORRECT;
+                }
+            }
+
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        // Default
+        return statusLogin.WRONGID;
     }
+
 
     public static void addToHistory(Transaction transaction )
     {
