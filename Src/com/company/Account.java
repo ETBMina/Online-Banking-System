@@ -1,12 +1,17 @@
 package com.company;
 import java.io.Serializable;
+import java.sql.Connection;
+import java.sql.Statement;
+
+
+enum errorType {  SOURSENOTEXIST , DESTINATIONNOTEXIST , VALUEISBIGGERTHANBALANCE  , SUCCESS , UNKNOWNERROR  }
 
 public class Account implements Serializable {
 
     private int user_id;
     private int password;
     private int balance ;
-    private  String full_name ;
+    private String full_name ;
 
     public Account(){}
 
@@ -48,23 +53,24 @@ public class Account implements Serializable {
         this.balance = balance;
     }
 
-    public static synchronized boolean editBalance (Transaction  trans )
+    public static synchronized errorType editBalance (Transaction  trans , Connection con, Statement stmt )
     {
-        if(DBController.doesAccountExist(trans.getSource()) != true  )
+        errorType errorType ;
+        if(DBController.doesAccountExist(trans.getSource() ,  con,  stmt) != true  )
         {
             // account does not exist transaction failed
-            return false ;
+            return com.company.errorType.SOURSENOTEXIST ;
         }
         Account source = new Account();
         Account destination = new Account();
-        source = DBController.readAccount(trans.getSource());
+        source = DBController.readAccount(trans.getSource(),  con,  stmt);
         switch (trans.getOperation())
         {
             case WITHDRAW:
                 if(trans.getValue()>source.getBalance())
                 {
                     //transaction failed
-                    return false;
+                    return com.company.errorType.VALUEISBIGGERTHANBALANCE;
                 }
                 //transaction succeded
                 source.setBalance(source.getBalance()-trans.getValue());
@@ -79,18 +85,18 @@ public class Account implements Serializable {
                 DBController.addToHistory(trans);
                 break;
             case TRANSFERTOSAMEBANK:
-                if(DBController.doesAccountExist(trans.getDestination()) != true  )
+                if(DBController.doesAccountExist(trans.getDestination() ,  con,  stmt) != true  )
                 {
                     // account does not exist transaction failed
-                    return false ;
+                    return com.company.errorType.DESTINATIONNOTEXIST ;
                 }
                 if(trans.getValue()>source.getBalance())
                 {
                     //transaction failed
-                    return false;
+                    return com.company.errorType.VALUEISBIGGERTHANBALANCE;
                 }
                 //transaction succeded
-                destination = DBController.readAccount(trans.getDestination());
+                destination = DBController.readAccount(trans.getDestination(),  con,  stmt);
                 //making the transaction
                 destination.setBalance(destination.getBalance()+trans.getValue());
                 source.setBalance(source.getBalance()-trans.getValue());
@@ -103,7 +109,7 @@ public class Account implements Serializable {
                 if(trans.getValue()>source.getBalance())
                 {
                     //transaction failed
-                    return false;
+                    return com.company.errorType.VALUEISBIGGERTHANBALANCE;
                 }
                 //transaction can succeded from the end of this server we now contact the other server
                 trans.setOperation(Transaction.operation.DEPOSITFROMANOTHERBANK);
@@ -113,7 +119,7 @@ public class Account implements Serializable {
                 if(answerFromOtherServer==false)
                 {
                     //account at destenation does not exist
-                    return false;
+                    return com.company.errorType.DESTINATIONNOTEXIST;
                 }
                 //other wise the transfer occured
                 //so we need to update our source her and add it her to our history
@@ -122,18 +128,18 @@ public class Account implements Serializable {
                 DBController.addToHistory(trans);
                 break;
             case DEPOSITFROMANOTHERBANK:
-                if(DBController.doesAccountExist(trans.getDestination()) != true  )
+                if(DBController.doesAccountExist(trans.getDestination()  ,  con,  stmt) != true  )
                 {
                     // account does not exist transaction failed
-                    return false ;
+                    return com.company.errorType.DESTINATIONNOTEXIST ;
                 }
-                destination = DBController.readAccount(trans.getDestination());
+                destination = DBController.readAccount(trans.getDestination(),  con,  stmt);
                 destination.setBalance(destination.getBalance()+trans.getValue());
                 DBController.editBalance(destination);
                 DBController.addToHistory(trans);
-                return true ;
+                return com.company.errorType.SUCCESS ;
         }
-        return false;
+        return com.company.errorType.UNKNOWNERROR;
     }
 
     public static synchronized boolean editBalanceforotherserver (Transaction  trans )

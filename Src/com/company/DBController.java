@@ -1,6 +1,7 @@
 package com.company;
 
 import java.sql.*;
+enum statusLogin {WRONGID, WRONGPASSWORD, CORRECT}
 
 public class DBController {
 
@@ -59,11 +60,17 @@ public class DBController {
 
     }
 
-    public static synchronized int login(Account account){
-        return 0;
-    }
 
-    public static synchronized void addToHistory(Transaction transaction ){
+
+
+
+
+
+
+
+    public static statusLogin login(Account account, Connection con, Statement stmt) { return statusLogin.WRONGID; }
+
+    public static void addToHistory(Transaction transaction) {
         return;
     }
 
@@ -75,14 +82,74 @@ public class DBController {
         return;
     }
 
-    public static synchronized Account readAccount ( int id)
+
+
+
+
+
+
+
+
+
+    public static synchronized   Account readAccount(int id , Connection con, Statement stmt) {
+
+        Account account = new Account();
+        account.setUser_id(id);
+
+        PreparedStatement idPreparedStatement = null;
+        ResultSet idResutlRet = null;
+        String idQuery = "SELECT * FROM Bank WHERE ID = ?";
+        try {
+            // Make idQuery as prepared statement
+            idPreparedStatement = con.prepareStatement(idQuery);
+            // replace the first Question Mark ?
+            idPreparedStatement.setInt(1, account.getUser_id());
+            // Execute the query
+            idResutlRet = idPreparedStatement.executeQuery();
+
+            if (!idResutlRet.next()) {
+                return account;
+            }
+            else {
+                int balance=idResutlRet.getInt("BALANCE");
+                account.setBalance(balance);
+                return account;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        // Default
+        return account;
+    }
+
+    public  static  synchronized boolean doesAccountExist ( int id, Connection con, Statement stmt)
     {
-        Account he = new Account("mina", 13 ,13);
-        return he;
+        Account account = new Account();
+        account.setUser_id(id);
+        PreparedStatement idPreparedStatement = null;
+        ResultSet idResutlRet = null;
+        String idQuery = "SELECT * FROM Bank WHERE ID = ?";
+        try {
+            // Make idQuery as prepared statement
+            idPreparedStatement = con.prepareStatement(idQuery);
+            // replace the first Question Mark ?
+            idPreparedStatement.setInt(1, account.getUser_id());
+            // Execute the query
+            idResutlRet = idPreparedStatement.executeQuery();
 
+            if (!idResutlRet.next()) {
+                return false;
+            }
+            else {
+             //   int balance=idResutlRet.getInt("BALANCE");
+               // account.setBalance(balance);
+                return true;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        // Default
+        return false;
     }
-    public  static  synchronized boolean doesAccountExist ( int id){
 
-        return false ;
-    }
 }
