@@ -2,6 +2,7 @@ package com.company;
 
 import java.sql.SQLException;
 import java.sql.Statement;
+
 import static com.company.DBController.*;
 
 public class Client_Main {
@@ -16,5 +17,10 @@ public class Client_Main {
         } catch (SQLException e) {
             System.out.println("Something went wrong: " + e.getMessage());
         }*/
+
+        /*
+        Transaction t1=new Transaction(1,2,3000,operation.WITHDRAW);
+        addToHistory(t1);
+        */
     }
 }
