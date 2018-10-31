@@ -3,7 +3,7 @@ package com.company;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-
+enum statusLogin {WRONGID, WRONGPASSWORD, CORRECT}
 public class DBController {
     public static Connection createConnection() {
         Connection connection = null;
@@ -109,9 +109,24 @@ public class DBController {
         }
         return;
     }
-    public static String viewHistory(Account account){
-        return "okay";
+    public static String viewHistory(Account account, Connection con) throws SQLException {
+        PreparedStatement idPreparedStatement = null;
+        ResultSet idResutlRet = null;
+        String idQuery = "SELECT * FROM History WHERE ID = ?";
+        // Make idQuery as prepared statement
+        idPreparedStatement = con.prepareStatement(idQuery);
+        // Set ID Value
+        idPreparedStatement.setInt(1, account.getUser_id());
+
+        idResutlRet = idPreparedStatement.executeQuery();
+        String string = new String();
+        while (idResutlRet.next()) {
+            string += (idResutlRet.getString(1) + "\n");
+        }
+        return string;
     }
+
+   
     public synchronized static void editBalance(com.company.Account account)
     {
         int newBalance=account.getBalance();
