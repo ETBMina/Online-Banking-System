@@ -1,6 +1,8 @@
 package com.company;
 
-public class Transaction {
+import java.io.Serializable;
+
+public class Transaction implements Serializable {
 
     enum operation {   WITHDRAW  , DEPOSIT , DEPOSITFROMANOTHERBANK, TRANSFERTOSAMEBANK , TRANSFERTOANOTHERBANK    } ;
 

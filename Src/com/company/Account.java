@@ -9,9 +9,23 @@ enum errorType {  SOURSENOTEXIST , DESTINATIONNOTEXIST , VALUEISBIGGERTHANBALANC
 public class Account implements Serializable {
 
     private int user_id;
-    private int password;
     private int balance ;
     private String full_name ;
+    private int password;
+
+    public Account(int user_id, int password) {
+        this.user_id = user_id;
+        this.password = password;
+    }
+
+
+    public Account(int user_id, int password, int balance, String full_name) {
+        this.user_id = user_id;
+        this.password = password;
+        this.balance = balance;
+        this.full_name = full_name;
+    }
+
 
     public Account(){}
 
@@ -20,6 +34,7 @@ public class Account implements Serializable {
         this.balance = balance;
         this.full_name = full_name;
     }
+
 
     public String getFull_name() {
         return full_name;

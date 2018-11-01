@@ -1,6 +1,8 @@
 package com.company;
 
-public class Packet {
+import java.io.Serializable;
+
+public class Packet implements Serializable {
 
     enum command {REGISTER, LOGIN, LOGOUT, BALANCE, OPERATION};
 
@@ -13,6 +15,20 @@ public class Packet {
         this.transaction = transaction;
         this.command = command;
     }
+
+    public Packet() { }
+
+    public Packet(Account account, Packet.command command) {
+        this.account = account;
+        this.command = command;
+    }
+
+
+
+    public Packet( Packet.command command) {
+        this.command = command;
+    }
+
 
     public Packet.command getCommand() { return command; }
 

@@ -3,8 +3,10 @@ package com.company;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+
 enum statusLogin {WRONGID, WRONGPASSWORD, CORRECT}
 public class DBController {
+
     public static Connection createConnection() {
         Connection connection = null;
         try {
@@ -23,6 +25,7 @@ public class DBController {
         }
         return stmt;
     }
+
     public static boolean register (com.company.Account account, Statement stmt) {
         try {
 
@@ -60,7 +63,7 @@ public class DBController {
     public static statusLogin login(Account account, Connection con, Statement stmt) {
         PreparedStatement idPreparedStatement = null;
         ResultSet idResutlRet = null;
-        String idQuery = "SELECT * FROM Bank WHERE ID = ?";
+        String idQuery = "SELECT * FROM Accounts WHERE ID = ?";
         try {
             // Make idQuery as prepared statement
             idPreparedStatement = con.prepareStatement(idQuery);
