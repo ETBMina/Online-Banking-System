@@ -48,8 +48,8 @@ public class Transaction implements Serializable {
                 printStirng = "Account no. = "+ Integer.toString(source)+"Deposited an amount of money of Value = "+Integer.toString(value) +"to his account.";
                 break;
             case TRANSFERTOSAMEBANK:
-                case TRANSFERTOANOTHERBANK:
-                    case DEPOSITFROMANOTHERBANK:
+            case TRANSFERTOANOTHERBANK:
+            case DEPOSITFROMANOTHERBANK:
                 printStirng = "Account no. = "+ Integer.toString(source)+"Deposited an amount of money of Value = "+Integer.toString(value) +"to Account no. = "+Integer.toString(source)+"  ." ;
                 break;
         }

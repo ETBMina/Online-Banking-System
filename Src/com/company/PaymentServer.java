@@ -19,18 +19,18 @@ public class PaymentServer
             //create socket
             String data = readFileAsString("ServerPortNo.txt");
             ServerSocket s = new ServerSocket(Integer.parseInt(data));
-
+            //ServerSocket s = new ServerSocket(1234);
             // number of clients
             int n = 1 ;
             //greating at server
-            System.out.println("the server is ready to accept clients ");
+            System.out.println("The server is ready to accept clients ");
 
             while (true)
             {
                 Socket c = s.accept();
                 System.out.println("A Client just arrived ");
                 ClientHandler ch = new ClientHandler(c);
-                //handle clients in parrallel
+                //handle clients in parallel
                 Thread t = new Thread(ch);
                 t.start();
                 //create new light weight process

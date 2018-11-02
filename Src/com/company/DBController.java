@@ -10,7 +10,7 @@ public class DBController {
     public static Connection createConnection() {
         Connection connection = null;
         try {
-            connection = DriverManager.getConnection("jdbc:sqlite:testjava.db");
+            connection = DriverManager.getConnection("jdbc:sqlite:database.db");
         } catch (SQLException e) {
             System.out.println("Something went wromg: " + e.getMessage());
         }
@@ -26,36 +26,35 @@ public class DBController {
         return stmt;
     }
 
-    public static boolean register (com.company.Account account, Statement stmt) {
+    public static int register (com.company.Account account, Statement stmt) {
         try {
-
             String sql = "CREATE TABLE IF NOT EXISTS Accounts " +
                     "(ID INTEGER PRIMARY KEY     AUTOINCREMENT," +
                     " NAME           TEXT    NOT NULL, " +
-                    " PASSWORD       INT     NOT NULL, " +
+                    " PASSWORD       TEXT     NOT NULL, " +
                     " BALANCE        INT     NOT NULL)";
             stmt.execute(sql);
-
+            String hashedPass= BCrypt.hashpw(Integer.toString(account.getPassword()), BCrypt.gensalt(12));
             sql = "INSERT INTO Accounts (NAME,PASSWORD,BALANCE) " +
                     "VALUES ('"+account.getFull_name()+"' , '"+
-                    Integer.toString(account.getPassword()) +"' , '"+
+                    hashedPass +"' , '"+
                     Integer.toString(account.getBalance())+"')";
-            ResultSet rs = stmt.executeQuery( "SELECT * FROM Accounts WHERE NAME='"+
-                    account.getFull_name()+"' AND PASSWORD='"+
-                    Integer.toString(account.getPassword())+"' AND BALANCE='"+
-                    Integer.toString(account.getBalance())+"'");
+            stmt.execute(sql);
+           /* ResultSet rs = stmt.executeQuery( "SELECT * FROM Accounts WHERE NAME='"+
+                    account.getFull_name()+"' AND BALANCE='"+
+                    Integer.toString(account.getBalance())+"'");*/
+            ResultSet rs = stmt.executeQuery( "select * from Accounts WHERE ID=(SELECT MAX(ID) from Accounts)");
 
             while ( rs.next() ) {
-                int id = rs.getInt("ID");
-                account.setUser_id(id);
-                //System.out.println(Integer.toString(id));
+              //  if (BCrypt.checkpw(Integer.toString(account.getPassword()), hashedPass))
+                    return rs.getInt("ID");
             }
-                stmt.execute(sql);
 
-            return true;
+
+            return -1;
         } catch (SQLException e) {
             System.out.println("Something went wrong: " + e.getMessage());
-            return false;
+            return -1;
         }
 
 
@@ -71,11 +70,10 @@ public class DBController {
             idPreparedStatement.setInt(1, account.getUser_id());
             // Execute the query
             idResutlRet = idPreparedStatement.executeQuery();
-
             if (!idResutlRet.next()) {
                 return statusLogin.WRONGID;
             } else {
-                if (account.getPassword() !=  idResutlRet.getInt(3))
+                if (!BCrypt.checkpw(Integer.toString(account.getPassword()), idResutlRet.getString(3)))
                     return statusLogin.WRONGPASSWORD;
                 else {
                     account.setFull_name(idResutlRet.getString(2));
@@ -93,9 +91,9 @@ public class DBController {
     }
 
 
-    public static void addToHistory(Transaction transaction )
+    public static void addToHistory(Transaction transaction,Connection conn )
     {
-        Statement stmt= createStatement(createConnection());
+        Statement stmt= createStatement(conn);
         String SQL="CREATE TABLE IF NOT EXISTS History " +
                 "(ID INTEGER PRIMARY KEY AUTOINCREMENT," +
                 "DESCRIPTION TEXT NOT NULL )";
@@ -129,26 +127,25 @@ public class DBController {
         return string;
     }
 
-   
-    public synchronized static void editBalance(com.company.Account account)
+
+    public synchronized static void editBalance(com.company.Account account,Connection conn)
     {
-        int newBalance=account.getBalance();
-        Statement stmt= createStatement(createConnection());
-        String SQL="UPDATE Accounts SET BALANCE = '"+Integer.toString(account.getBalance())+"' "+ "WHERE ID ="+Integer.toString(account.getUser_id());
+        Statement stmt= createStatement(conn);
+        String SQL="UPDATE Accounts SET BALANCE = '"+Integer.toString(account.getBalance())+ "'WHERE ID = '"+Integer.toString(account.getUser_id())+"'";
         try {
             stmt.execute(SQL);
         } catch (SQLException e) {
-            System.out.println("Something went wrong: " + e.getMessage());
+            System.out.println("Something went wrong:x " + e.getMessage());
         }
 
         return;
     }
-  
-  
-  
-  
-  
-  
+
+
+
+
+
+
     public static synchronized   Account readAccount(int id , Connection con, Statement stmt) {
 
         Account account = new Account();
@@ -156,7 +153,7 @@ public class DBController {
 
         PreparedStatement idPreparedStatement = null;
         ResultSet idResutlRet = null;
-        String idQuery = "SELECT * FROM Bank WHERE ID = ?";
+        String idQuery = "SELECT * FROM Accounts WHERE ID = ?";
         try {
             // Make idQuery as prepared statement
             idPreparedStatement = con.prepareStatement(idQuery);
@@ -186,7 +183,7 @@ public class DBController {
         account.setUser_id(id);
         PreparedStatement idPreparedStatement = null;
         ResultSet idResutlRet = null;
-        String idQuery = "SELECT * FROM Bank WHERE ID = ?";
+        String idQuery = "SELECT * FROM Accounts WHERE ID = ?";
         try {
             // Make idQuery as prepared statement
             idPreparedStatement = con.prepareStatement(idQuery);
@@ -199,8 +196,8 @@ public class DBController {
                 return false;
             }
             else {
-             //   int balance=idResutlRet.getInt("BALANCE");
-               // account.setBalance(balance);
+                //   int balance=idResutlRet.getInt("BALANCE");
+                // account.setBalance(balance);
                 return true;
             }
         } catch (SQLException e) {
@@ -209,8 +206,8 @@ public class DBController {
         // Default
         return false;
     }
-  
-  
-  
-  
+
+
+
+
 }

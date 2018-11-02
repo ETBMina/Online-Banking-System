@@ -3,6 +3,8 @@ import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.Statement;
 
+import static com.company.errorType.SUCCESS;
+
 
 enum errorType {  SOURSENOTEXIST , DESTINATIONNOTEXIST , VALUEISBIGGERTHANBALANCE  , SUCCESS , UNKNOWNERROR  }
 
@@ -89,16 +91,16 @@ public class Account implements Serializable {
                 }
                 //transaction succeded
                 source.setBalance(source.getBalance()-trans.getValue());
-                DBController.editBalance(source);
-                DBController.addToHistory(trans);
-                break;
+                DBController.editBalance(source,con);
+                DBController.addToHistory(trans,con);
+                return SUCCESS;
             case DEPOSIT:
                 //making the transaction
                 source.setBalance(source.getBalance()+trans.getValue());
                 //updating the data base
-                DBController.editBalance(source);
-                DBController.addToHistory(trans);
-                break;
+                DBController.editBalance(source,con);
+                DBController.addToHistory(trans,con);
+                return SUCCESS;
             case TRANSFERTOSAMEBANK:
                 if(DBController.doesAccountExist(trans.getDestination() ,  con,  stmt) != true  )
                 {
@@ -116,9 +118,9 @@ public class Account implements Serializable {
                 destination.setBalance(destination.getBalance()+trans.getValue());
                 source.setBalance(source.getBalance()-trans.getValue());
                 //updating the data base
-                DBController.editBalance(source);
-                DBController.editBalance(destination);
-                DBController.addToHistory(trans);
+                DBController.editBalance(source,con);
+                DBController.editBalance(destination,con);
+                DBController.addToHistory(trans,con);
                 break;
             case TRANSFERTOANOTHERBANK:
                 if(trans.getValue()>source.getBalance())
@@ -139,8 +141,8 @@ public class Account implements Serializable {
                 //other wise the transfer occured
                 //so we need to update our source her and add it her to our history
                 source.setBalance(source.getBalance()-trans.getValue());
-                DBController.editBalance(source);
-                DBController.addToHistory(trans);
+                DBController.editBalance(source,con);
+                DBController.addToHistory(trans,con);
                 break;
             case DEPOSITFROMANOTHERBANK:
                 if(DBController.doesAccountExist(trans.getDestination()  ,  con,  stmt) != true  )
@@ -150,9 +152,9 @@ public class Account implements Serializable {
                 }
                 destination = DBController.readAccount(trans.getDestination(),  con,  stmt);
                 destination.setBalance(destination.getBalance()+trans.getValue());
-                DBController.editBalance(destination);
-                DBController.addToHistory(trans);
-                return com.company.errorType.SUCCESS ;
+                DBController.editBalance(destination,con);
+                DBController.addToHistory(trans,con);
+                return SUCCESS ;
         }
         return com.company.errorType.UNKNOWNERROR;
     }

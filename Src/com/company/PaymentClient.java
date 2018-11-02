@@ -1,5 +1,6 @@
 package com.company;
 
+
 import java.io.*;
 import java.net.Socket;
 import java.nio.file.Files;
@@ -19,6 +20,8 @@ public class PaymentClient
             String portNumber = data.substring(10,14);
             String serverIp = data.substring(0,9);
             Socket c = new Socket(serverIp, Integer.parseInt(portNumber));
+            //Socket c = new Socket("127.0.0.1",1234);
+
 
             //open comm
             ObjectOutputStream os = new ObjectOutputStream(c.getOutputStream());
@@ -36,9 +39,9 @@ public class PaymentClient
             {
 
                 //welcome user
-                System.out.println("enter 1 for log in");
-                System.out.println("enter 2 for register");
-                System.out.println("enter 3 to close applicarion");
+                System.out.println("please, enter 1 to login");
+                System.out.println("        enter 2 to register");
+                System.out.println("        enter 3 to close the application");
 
                 //taking input and checking it is right
                 String userResp = sc.nextLine();
@@ -69,25 +72,90 @@ public class PaymentClient
 
                         //sending to server
                         System.out.println("please hold while we contact the server.");
+                        Account account=new Account(Integer.parseInt(userId),Integer.parseInt(password));
                         packetToSend =
-                         new Packet( new Account(Integer.parseInt(userId),Integer.parseInt(password)) , Packet.command.LOGIN  );
+                                new Packet( account , Packet.command.LOGIN  );
                         os.writeObject(packetToSend);
 
                         //reciving packet response
                         packetToRecive =(ServerResponse) is.readObject();
                         System.out.println(packetToRecive.getResponse());
                         if(packetToRecive.isSucces())
+                            inner:
                             while(true)
                             {
+                                System.out.println("please, enter 1 to check your current balance"     +"\n"+
+                                                   "        enter 2 to deposit cash to your account"   +"\n"+
+                                                   "        enter 3 to withdraw cash from your account"+"\n"+
+                                                   "        enter 4 to                                "+"\n"+
+                                                   "        enter 5 to                                "+"\n"+
+                                                   "        enter 6 to                                "+"\n");
+
+                                String userInputChoice = sc.nextLine();
+                                Packet receivedPacket=new Packet();
+                                switch (userInputChoice)
+                                {
+                                    case "1":
+                                        Packet p=new Packet(packetToSend.getAccount(),Packet.command.BALANCE);
+                                        System.out.println("please hold while we contact the server.");
+                                        os.writeObject(p);
+                                        receivedPacket =(Packet) is.readObject();
+                                        System.out.println("Your current balance = "+receivedPacket.getAccount().getBalance());
+
+
+                                        continue inner;
+                                    case "2":
+                                        System.out.println("please enter the needed amount of cash to deposit in your accunt: ");
+                                        String value = sc.nextLine();
+                                        if(!isStringInteger(value)){
+                                            System.out.println("Invalid amount of cash");
+                                        }
+                                        else if(Integer.parseInt(value)<=0){
+                                            System.out.println("Invalid amount of cash");
+                                        }
+                                        else{
+                                            Transaction trans=new Transaction(account.getUser_id(),account.getUser_id(),Integer.parseInt(value),Transaction.operation.DEPOSIT);
+                                            Packet DepositPacket=new Packet(packetToSend.getAccount(),trans,Packet.command.OPERATION);
+                                            System.out.println("please hold while we contact the server.");
+                                            os.writeObject(DepositPacket);
+                                            packetToRecive =(ServerResponse) is.readObject();
+                                            System.out.println(packetToRecive.getResponse());
+                                        }
+                                        continue inner;
+                                    case "3":
+                                        System.out.println("please enter the needed amount of cash to withdraw from your accunt: ");
+                                        value = sc.nextLine();
+                                        if(!isStringInteger(value)){
+                                            System.out.println("Invalid amount of cash");
+                                        }
+                                        else if(Integer.parseInt(value)<=0){
+                                            System.out.println("Invalid amount of cash");
+                                        }
+                                        else{
+                                            Transaction trans=new Transaction(account.getUser_id(),account.getUser_id(),Integer.parseInt(value),Transaction.operation.WITHDRAW);
+                                            Packet DepositPacket=new Packet(packetToSend.getAccount(),trans,Packet.command.OPERATION);
+                                            System.out.println("please hold while we contact the server.");
+                                            os.writeObject(DepositPacket);
+                                            packetToRecive =(ServerResponse) is.readObject();
+                                            System.out.println(packetToRecive.getResponse());
+                                        }
+                                        continue inner;
+                                    case "4":
+                                        break;
+                                    case "5":
+                                        break;
+                                    case "6":
+                                        break;
+                                    default:
+                                        System.out.println("error in your option try again ");
+                                        break;
+
+
+                                }
 
 
 
-
-
-
-
-
-                            //////////////////////////////////////////////here//////////////////////////////////
+                                //////////////////////////////////////////////here//////////////////////////////////
 
 
 
@@ -99,7 +167,7 @@ public class PaymentClient
 
                             }
 
-                            continue outer;
+                        continue outer;
                     case "2" :
                         //taking in full name
                         System.out.println("Enter your FULLNAME : ");
@@ -117,7 +185,7 @@ public class PaymentClient
                         //taking in balance
                         String balance ="" ;
                         do {
-                            System.out.println("Enter your BALANCE : ");
+                            System.out.println("Enter an initial amount to deposit : ");
                             balance = sc.nextLine();
                             if (!checkUserId(balance))
                                 System.out.println("INVALID BALANCE  try  again");
@@ -144,14 +212,14 @@ public class PaymentClient
             //close comm
             os.close();
             is.close();
-           // dis.close();
-           // dos.close();
+            // dis.close();
+            // dos.close();
             //close socket for client
             c.close();
         }
         catch (IOException ex)
         {
-         //3
+            //3
             //   System.out.println("config file does not exist please confirm with our support team");
         }
         catch (Exception e)
@@ -197,5 +265,13 @@ public class PaymentClient
                 return false;
         }
         return true ;
+    }
+    public static boolean isStringInteger(String number ){
+        try{
+            Integer.parseInt(number);
+        }catch(Exception e ){
+            return false;
+        }
+        return true;
     }
 }
