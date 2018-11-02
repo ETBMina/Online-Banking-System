@@ -30,8 +30,8 @@ public class ClientHandler  implements Runnable
             //    DataInputStream dis = new DataInputStream(c.getInputStream());
 
             //to connect to DB
-            Connection conn=createConnection();
-            Statement stmt = createStatement(conn);
+            /*Connection conn=createConnection();
+            Statement stmt = createStatement(conn);*/
             Packet recivedPacket = new Packet();
             ServerResponse serverResponsed = new ServerResponse();
 
@@ -43,7 +43,7 @@ public class ClientHandler  implements Runnable
                 switch (recivedPacket.getCommand())
                 {
                     case REGISTER:
-                        int id = DBController.register(recivedPacket.getAccount(),stmt);
+                        int id = DBController.register(recivedPacket.getAccount());
                         if(id!=-1)
                         {
                             serverResponsed = new ServerResponse(  "you are now Registered and your id is "
@@ -59,7 +59,7 @@ public class ClientHandler  implements Runnable
                         }
                         continue outer;
                     case LOGIN:
-                        statusLogin sLI = DBController.login(recivedPacket.getAccount() ,conn ,stmt);
+                        statusLogin sLI = DBController.login(recivedPacket.getAccount());
                         switch (sLI)
                         {
                             case WRONGID:
@@ -80,7 +80,7 @@ public class ClientHandler  implements Runnable
                                     {
 
                                         case BALANCE:
-                                            Account account=DBController.readAccount(packet.getAccount().getUser_id() , conn, stmt);
+                                            Account account=DBController.readAccount(packet.getAccount().getUser_id() );
                                             packet.setAccount(account);
                                             os.writeObject(packet);
                                             continue inner;
@@ -89,13 +89,13 @@ public class ClientHandler  implements Runnable
                                             {
                                                 case DEPOSIT:
                                                     ServerResponse depositresponse=new ServerResponse();
-                                                    if(Account.editBalance(packet.getTransaction(),conn,stmt)==errorType.SUCCESS)
+                                                    if(Account.editBalance(packet.getTransaction())==errorType.SUCCESS)
                                                         depositresponse.setResponse(Integer.toString(packet.getTransaction().getValue())+" was deposited into your account successfully");
                                                     os.writeObject(depositresponse);
                                                     continue inner;
                                                 case WITHDRAW:
                                                     ServerResponse withdrawresponse=new ServerResponse();
-                                                    if(Account.editBalance(packet.getTransaction(),conn,stmt)==errorType.SUCCESS)
+                                                    if(Account.editBalance(packet.getTransaction())==errorType.SUCCESS)
                                                         withdrawresponse.setResponse(Integer.toString(packet.getTransaction().getValue())+" was withdrawn from your account successfully");
                                                     else
                                                         withdrawresponse.setResponse("Your current balance is not enough to withdraw "+Integer.toString(packet.getTransaction().getValue())+" from your account");

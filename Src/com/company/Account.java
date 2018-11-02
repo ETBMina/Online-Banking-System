@@ -70,17 +70,17 @@ public class Account implements Serializable {
         this.balance = balance;
     }
 
-    public static synchronized errorType editBalance (Transaction  trans , Connection con, Statement stmt )
+    public static synchronized errorType editBalance (Transaction  trans )
     {
         errorType errorType ;
-        if(DBController.doesAccountExist(trans.getSource() ,  con,  stmt) != true  )
+        if(DBController.doesAccountExist(trans.getSource() ) != true  )
         {
             // account does not exist transaction failed
             return com.company.errorType.SOURSENOTEXIST ;
         }
         Account source = new Account();
         Account destination = new Account();
-        source = DBController.readAccount(trans.getSource(),  con,  stmt);
+        source = DBController.readAccount(trans.getSource());
         switch (trans.getOperation())
         {
             case WITHDRAW:
@@ -91,18 +91,18 @@ public class Account implements Serializable {
                 }
                 //transaction succeded
                 source.setBalance(source.getBalance()-trans.getValue());
-                DBController.editBalance(source,con);
-                DBController.addToHistory(trans,con);
+                DBController.editBalance(source);
+                DBController.addToHistory(trans);
                 return SUCCESS;
             case DEPOSIT:
                 //making the transaction
                 source.setBalance(source.getBalance()+trans.getValue());
                 //updating the data base
-                DBController.editBalance(source,con);
-                DBController.addToHistory(trans,con);
+                DBController.editBalance(source);
+                DBController.addToHistory(trans);
                 return SUCCESS;
             case TRANSFERTOSAMEBANK:
-                if(DBController.doesAccountExist(trans.getDestination() ,  con,  stmt) != true  )
+                if(DBController.doesAccountExist(trans.getDestination()) != true  )
                 {
                     // account does not exist transaction failed
                     return com.company.errorType.DESTINATIONNOTEXIST ;
@@ -113,14 +113,14 @@ public class Account implements Serializable {
                     return com.company.errorType.VALUEISBIGGERTHANBALANCE;
                 }
                 //transaction succeded
-                destination = DBController.readAccount(trans.getDestination(),  con,  stmt);
+                destination = DBController.readAccount(trans.getDestination());
                 //making the transaction
                 destination.setBalance(destination.getBalance()+trans.getValue());
                 source.setBalance(source.getBalance()-trans.getValue());
                 //updating the data base
-                DBController.editBalance(source,con);
-                DBController.editBalance(destination,con);
-                DBController.addToHistory(trans,con);
+                DBController.editBalance(source);
+                DBController.editBalance(destination);
+                DBController.addToHistory(trans);
                 break;
             case TRANSFERTOANOTHERBANK:
                 if(trans.getValue()>source.getBalance())
@@ -141,19 +141,19 @@ public class Account implements Serializable {
                 //other wise the transfer occured
                 //so we need to update our source her and add it her to our history
                 source.setBalance(source.getBalance()-trans.getValue());
-                DBController.editBalance(source,con);
-                DBController.addToHistory(trans,con);
+                DBController.editBalance(source);
+                DBController.addToHistory(trans);
                 break;
             case DEPOSITFROMANOTHERBANK:
-                if(DBController.doesAccountExist(trans.getDestination()  ,  con,  stmt) != true  )
+                if(DBController.doesAccountExist(trans.getDestination()  ) != true  )
                 {
                     // account does not exist transaction failed
                     return com.company.errorType.DESTINATIONNOTEXIST ;
                 }
-                destination = DBController.readAccount(trans.getDestination(),  con,  stmt);
+                destination = DBController.readAccount(trans.getDestination());
                 destination.setBalance(destination.getBalance()+trans.getValue());
-                DBController.editBalance(destination,con);
-                DBController.addToHistory(trans,con);
+                DBController.editBalance(destination);
+                DBController.addToHistory(trans);
                 return SUCCESS ;
         }
         return com.company.errorType.UNKNOWNERROR;

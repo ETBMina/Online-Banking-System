@@ -26,8 +26,10 @@ public class DBController {
         return stmt;
     }
 
-    public static int register (com.company.Account account, Statement stmt) {
+    public static synchronized int register (com.company.Account account) {
         try {
+            Connection conn=createConnection();
+            Statement stmt=createStatement(conn);
             String sql = "CREATE TABLE IF NOT EXISTS Accounts " +
                     "(ID INTEGER PRIMARY KEY     AUTOINCREMENT," +
                     " NAME           TEXT    NOT NULL, " +
@@ -49,7 +51,7 @@ public class DBController {
               //  if (BCrypt.checkpw(Integer.toString(account.getPassword()), hashedPass))
                     return rs.getInt("ID");
             }
-
+            conn.close();
 
             return -1;
         } catch (SQLException e) {
@@ -59,7 +61,9 @@ public class DBController {
 
 
     }
-    public static statusLogin login(Account account, Connection con, Statement stmt) {
+    public static synchronized statusLogin  login(Account account) {
+        Connection con=createConnection();
+        Statement stmt=createStatement(con);
         PreparedStatement idPreparedStatement = null;
         ResultSet idResutlRet = null;
         String idQuery = "SELECT * FROM Accounts WHERE ID = ?";
@@ -71,13 +75,18 @@ public class DBController {
             // Execute the query
             idResutlRet = idPreparedStatement.executeQuery();
             if (!idResutlRet.next()) {
+                con.close();
                 return statusLogin.WRONGID;
+
             } else {
-                if (!BCrypt.checkpw(Integer.toString(account.getPassword()), idResutlRet.getString(3)))
+                if (!BCrypt.checkpw(Integer.toString(account.getPassword()), idResutlRet.getString(3))){
+                    con.close();
                     return statusLogin.WRONGPASSWORD;
+                }
                 else {
                     account.setFull_name(idResutlRet.getString(2));
                     account.setBalance(idResutlRet.getInt(4));
+                    con.close();
                     return statusLogin.CORRECT;
                 }
             }
@@ -91,9 +100,10 @@ public class DBController {
     }
 
 
-    public static void addToHistory(Transaction transaction,Connection conn )
+    public static synchronized void addToHistory(Transaction transaction)
     {
-        Statement stmt= createStatement(conn);
+        Connection con=createConnection();
+        Statement stmt= createStatement(con);
         String SQL="CREATE TABLE IF NOT EXISTS History " +
                 "(ID INTEGER PRIMARY KEY AUTOINCREMENT," +
                 "DESCRIPTION TEXT NOT NULL )";
@@ -105,12 +115,15 @@ public class DBController {
             SQL="INSERT INTO History(DESCRIPTION) " +
                     "VALUES ('"+transactionDescription+"')";
             stmt.execute(SQL);
+            con.close();
         } catch (SQLException e) {
             System.out.println("Cannot Add Transaction To History " + e.getMessage());
         }
+
         return;
     }
-    public static String viewHistory(Account account, Connection con) throws SQLException {
+    public static synchronized String viewHistory(Account account) throws SQLException {
+        Connection con=createConnection();
         PreparedStatement idPreparedStatement = null;
         ResultSet idResutlRet = null;
         String idQuery = "SELECT * FROM History WHERE ID = ?";
@@ -124,16 +137,19 @@ public class DBController {
         while (idResutlRet.next()) {
             string += (idResutlRet.getString(1) + "\n");
         }
+        con.close();
         return string;
     }
 
 
-    public synchronized static void editBalance(com.company.Account account,Connection conn)
+    public synchronized static void editBalance(com.company.Account account)
     {
-        Statement stmt= createStatement(conn);
+        Connection con=createConnection();
+        Statement stmt= createStatement(con);
         String SQL="UPDATE Accounts SET BALANCE = '"+Integer.toString(account.getBalance())+ "'WHERE ID = '"+Integer.toString(account.getUser_id())+"'";
         try {
             stmt.execute(SQL);
+            con.close();
         } catch (SQLException e) {
             System.out.println("Something went wrong:x " + e.getMessage());
         }
@@ -146,8 +162,9 @@ public class DBController {
 
 
 
-    public static synchronized   Account readAccount(int id , Connection con, Statement stmt) {
-
+    public static synchronized   Account readAccount(int id ) {
+        Connection con=createConnection();
+        Statement stmt=createStatement(con);
         Account account = new Account();
         account.setUser_id(id);
 
@@ -163,11 +180,13 @@ public class DBController {
             idResutlRet = idPreparedStatement.executeQuery();
 
             if (!idResutlRet.next()) {
+                con.close();
                 return account;
             }
             else {
                 int balance=idResutlRet.getInt("BALANCE");
                 account.setBalance(balance);
+                con.close();
                 return account;
             }
         } catch (SQLException e) {
@@ -177,8 +196,10 @@ public class DBController {
         return account;
     }
 
-    public  static  synchronized boolean doesAccountExist ( int id, Connection con, Statement stmt)
+    public  static  synchronized boolean doesAccountExist ( int id)
     {
+        Connection con=createConnection();
+        Statement stmt=createStatement(con);
         Account account = new Account();
         account.setUser_id(id);
         PreparedStatement idPreparedStatement = null;
@@ -193,11 +214,13 @@ public class DBController {
             idResutlRet = idPreparedStatement.executeQuery();
 
             if (!idResutlRet.next()) {
+                con.close();
                 return false;
             }
             else {
                 //   int balance=idResutlRet.getInt("BALANCE");
                 // account.setBalance(balance);
+                con.close();
                 return true;
             }
         } catch (SQLException e) {
