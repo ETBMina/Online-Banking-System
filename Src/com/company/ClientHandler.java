@@ -1,18 +1,24 @@
 package com.company;
 
+import java.io.File;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.sql.*;
+import java.util.Scanner;
 
-import static com.company.DBController.createConnection;
-import static com.company.DBController.createStatement;
-import static com.company.DBController.editBalance;
+import static com.company.DBController.*;
 
 
 public class ClientHandler  implements Runnable
 {
     Socket c;
+    private static int serverNo;
+    public static void setServerNo(int serverNo) {
+        ClientHandler.serverNo = serverNo;
+    }
+
     public ClientHandler(Socket c)
     {
         this.c = c;
@@ -59,7 +65,15 @@ public class ClientHandler  implements Runnable
                         }
                         continue outer;
                     case LOGIN:
-                        statusLogin sLI = DBController.login(recivedPacket.getAccount());
+                        //statusLogin sLI = DBController.login(recivedPacket.getAccount());
+                        statusLogin sLI;
+                        if(recivedPacket.getFromServer()==true)
+                        {
+                            sLI=statusLogin.CORRECT;
+                        }
+                        else
+                            sLI=DBController.login(recivedPacket.getAccount());
+
                         switch (sLI)
                         {
                             case WRONGID:
@@ -90,7 +104,16 @@ public class ClientHandler  implements Runnable
                                                 case DEPOSIT:
                                                     ServerResponse depositresponse=new ServerResponse();
                                                     if(Account.editBalance(packet.getTransaction())==errorType.SUCCESS)
+                                                    {
                                                         depositresponse.setResponse(Integer.toString(packet.getTransaction().getValue())+" was deposited into your account successfully");
+                                                        depositresponse.setSucces(true);
+                                                    }
+                                                    else
+                                                    {
+                                                        depositresponse.setResponse("Deposit did not succeeded");
+                                                        depositresponse.setSucces(false);
+                                                    }
+
                                                     os.writeObject(depositresponse);
                                                     continue inner;
                                                 case WITHDRAW:
@@ -101,6 +124,64 @@ public class ClientHandler  implements Runnable
                                                         withdrawresponse.setResponse("Your current balance is not enough to withdraw "+Integer.toString(packet.getTransaction().getValue())+" from your account");
                                                     os.writeObject(withdrawresponse);
                                                     continue  inner;
+                                                case TRANSFERTOANOTHERBANK:
+                                                    File file=new File("Server.txt");
+                                                    Scanner fileScanner=new Scanner(file);
+                                                    int portNumber1=Integer.parseInt(fileScanner.nextLine());
+                                                    String serverIp1=fileScanner.nextLine();
+                                                    int portNumber2=Integer.parseInt(fileScanner.nextLine());
+                                                    String serverIp2=fileScanner.nextLine();
+                                                    int portNo;
+                                                    String serverIP;
+                                                    if(serverNo==1)
+                                                    {
+                                                        serverIP=serverIp2;
+                                                        portNo=portNumber2;
+                                                    }
+                                                    else
+                                                    {
+                                                        serverIP=serverIp1;
+                                                        portNo=portNumber1;
+                                                    }
+                                                    ServerResponse transferToAnotherBankResponse=new ServerResponse();
+                                                    ServerResponse responseFromAnotherBank=new ServerResponse();
+                                                    Socket socket=new Socket(serverIP,portNo);
+                                                    ObjectOutputStream outStream = new ObjectOutputStream(socket.getOutputStream());
+                                                    ObjectInputStream  inStream = new ObjectInputStream (socket.getInputStream()) ;
+
+                                                    int sourceID=packet.getTransaction().getSource();
+                                                    int destinationID=packet.getTransaction().getDestination();
+                                                    int value=packet.getTransaction().getValue();
+                                                    Transaction innerWithdrawTransaction=new Transaction(sourceID,sourceID,value, Transaction.operation.WITHDRAW);
+                                                    Transaction outerDebositTransaction=new Transaction(destinationID,destinationID,value, Transaction.operation.DEPOSIT);
+                                                    if(readAccount(sourceID).getBalance()>=value)
+                                                    {
+                                                        Packet packetToSend=new Packet(new Account(),outerDebositTransaction, Packet.command.LOGIN,true);
+                                                        outStream.writeObject(packetToSend);
+                                                        responseFromAnotherBank=(ServerResponse)inStream.readObject();
+                                                        //System.out.println(responseFromAnotherBank.getResponse());
+                                                        packetToSend = new Packet(new Account(),outerDebositTransaction, Packet.command.OPERATION,true);
+                                                        outStream.writeObject(packetToSend);
+                                                        responseFromAnotherBank=(ServerResponse)inStream.readObject();
+                                                        if(responseFromAnotherBank.isSucces()==true)
+                                                        {
+                                                            Account.editBalance(innerWithdrawTransaction);
+                                                            transferToAnotherBankResponse.setResponse("Transfer Complete");
+                                                        }
+                                                        else
+                                                        {
+                                                            transferToAnotherBankResponse.setResponse("Transfer Failed");
+                                                        }
+
+                                                        //System.out.println(responseFromAnotherBank.getResponse());
+
+                                                    }
+                                                    else
+                                                    {
+                                                        transferToAnotherBankResponse.setResponse("Your Balance is not enough to transfer "+Integer.toString(value));
+                                                    }
+                                                    os.writeObject(transferToAnotherBankResponse);
+                                                    continue inner;
 
                                             }
 
@@ -139,7 +220,7 @@ public class ClientHandler  implements Runnable
         }
         catch (Exception e)
         {
-            System.out.println("Something went wrong ");
+            System.out.println("Something went wrong "+e.getMessage());
         }
         System.out.println("A Client just left ");
         //    System.out.println("client number " +n + "just left");

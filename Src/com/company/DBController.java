@@ -7,10 +7,23 @@ import java.util.Calendar;
 enum statusLogin {WRONGID, WRONGPASSWORD, CORRECT}
 public class DBController {
 
+    private static Integer databaseSelector;
+
+    public static void setDatabaseSelector(Integer databaseSelector) {
+        DBController.databaseSelector = databaseSelector;
+    }
+
     public static Connection createConnection() {
         Connection connection = null;
         try {
-            connection = DriverManager.getConnection("jdbc:sqlite:database.db");
+            if(databaseSelector==1)
+            {
+                connection = DriverManager.getConnection("jdbc:sqlite:server1DB.db");
+            }
+            else
+            {
+                connection = DriverManager.getConnection("jdbc:sqlite:server2DB.db");
+            }
         } catch (SQLException e) {
             System.out.println("Something went wromg: " + e.getMessage());
         }
@@ -49,7 +62,9 @@ public class DBController {
 
             while ( rs.next() ) {
               //  if (BCrypt.checkpw(Integer.toString(account.getPassword()), hashedPass))
-                    return rs.getInt("ID");
+                int ret=rs.getInt("ID");
+                conn.close();
+                    return ret;
             }
             conn.close();
 
