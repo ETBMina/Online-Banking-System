@@ -76,6 +76,7 @@ public class ClientHandler  implements Runnable
                                 inner:
                                 while(true ) {
                                     Packet packet =(Packet) is.readObject();
+                                    //System.out.println(packet.getCommand());
                                     switch (packet.getCommand())
                                     {
 
@@ -101,12 +102,35 @@ public class ClientHandler  implements Runnable
                                                         withdrawresponse.setResponse("Your current balance is not enough to withdraw "+Integer.toString(packet.getTransaction().getValue())+" from your account");
                                                     os.writeObject(withdrawresponse);
                                                     continue  inner;
+                                                case TRANSFERTOSAMEBANK:
+                                                    // Server Response
+                                                    ServerResponse transferSameBankResponse=new ServerResponse();
+                                                    if(Account.editBalance(packet.getTransaction())==errorType.SUCCESS)
+                                                        transferSameBankResponse.setResponse(Integer.toString(packet.getTransaction().getValue())+" was transfer to another account successfully");
+                                                    else if(Account.editBalance(packet.getTransaction())==errorType.DESTINATIONNOTEXIST)
+                                                    {
+                                                        transferSameBankResponse.setResponse("ID not Exist");
+                                                    }
+                                                    else {
+                                                     System.out.println(Account.editBalance(packet.getTransaction())+"");
+                                                        transferSameBankResponse.setResponse("Your current balance is not enough to tranfer  " + Integer.toString(packet.getTransaction().getValue()) + " to another account");
+                                                    }os.writeObject(transferSameBankResponse);
+                                                    continue  inner;
 
                                             }
 
 
                                             continue inner;
+                                        case VIEWHISTORY:
+                                            // Recieve packet
+                                            String History = DBController.viewHistory(recivedPacket.getAccount());
+                                            //System.out.println("view History output : "+History);
 
+
+                                            serverResponsed = new ServerResponse(  "Your Transaction History is : \n"+History, true );
+                                            os.writeObject(serverResponsed);
+                                            //          dos.writeUTF("congratulations you have successfully registered");
+                                            continue inner;
                                         default:
                                             continue inner;
 
@@ -132,8 +156,12 @@ public class ClientHandler  implements Runnable
                                 //               dos.writeUTF("WRONG PASSWORD TRY TO LOG AGAIN");
                                 continue outer;
                         }
+
+
+                        continue outer;
                     case LOGOUT:
                         break outer;
+
                 }
             }
         }

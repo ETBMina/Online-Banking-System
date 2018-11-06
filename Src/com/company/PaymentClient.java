@@ -42,7 +42,6 @@ public class PaymentClient
                 System.out.println("please, enter 1 to login");
                 System.out.println("        enter 2 to register");
                 System.out.println("        enter 3 to close the application");
-
                 //taking input and checking it is right
                 String userResp = sc.nextLine();
                 if(!checkUserIpForFirstOption(userResp))
@@ -87,9 +86,9 @@ public class PaymentClient
                                 System.out.println("please, enter 1 to check your current balance"     +"\n"+
                                                    "        enter 2 to deposit cash to your account"   +"\n"+
                                                    "        enter 3 to withdraw cash from your account"+"\n"+
-                                                   "        enter 4 to                                "+"\n"+
+                                                   "        enter 4 to Transfer Money to another account within our bank"+"\n"+
                                                    "        enter 5 to                                "+"\n"+
-                                                   "        enter 6 to                                "+"\n");
+                                                   "        enter 6 to view History"                   +"\n");
 
                                 String userInputChoice = sc.nextLine();
                                 Packet receivedPacket=new Packet();
@@ -141,11 +140,48 @@ public class PaymentClient
                                         }
                                         continue inner;
                                     case "4":
-                                        break;
+                                        // Another account
+                                        Account anotherAccount = new Account() ;
+                                        // ID of another account
+                                        String anotherValue;
+                                        // get amount of cash to transfer
+                                        System.out.println("please enter the amount of cash to Transfer to another accunt: ");
+                                        value = sc.nextLine();
+                                        // Validate amount of money
+                                        if(!isStringInteger(value)||Integer.parseInt(value)<=0){
+                                            System.out.println("Invalid amount of cash");
+                                        }
+                                        // get id of another account
+                                        System.out.println("please enter the id of another accunt: ");
+                                        anotherValue =sc.nextLine();
+                                        // validate another account id
+                                        if(!isStringInteger(anotherValue)||Integer.parseInt(anotherValue)<=0)
+                                            System.out.println("Invalid Id");
+                                        else if (Integer.parseInt(anotherValue)==account.getUser_id())
+                                            System.out.println("you can't transfer to your account");
+                                        else{
+                                            //System.out.println(anotherAccount.getUser_id()+" is id");
+                                            anotherAccount.setUser_id(Integer.parseInt(anotherValue));
+                                            System.out.println(anotherAccount.getUser_id()+" is id");
+                                            Transaction trans=new Transaction(account.getUser_id(),anotherAccount.getUser_id(),Integer.parseInt(value),Transaction.operation.TRANSFERTOSAMEBANK);
+                                            Packet DepositPacket=new Packet(packetToSend.getAccount(),trans,Packet.command.OPERATION);
+                                            System.out.println("please hold while we contact the server.");
+                                            os.writeObject(DepositPacket);
+                                            packetToRecive =(ServerResponse) is.readObject();
+                                            System.out.println(packetToRecive.getResponse());
+                                        }
+                                        continue inner;
                                     case "5":
                                         break;
                                     case "6":
-                                        break;
+                                        //sending packet
+                                        Packet viewHistoryPacket=new Packet(packetToSend.getAccount(),Packet.command.VIEWHISTORY);
+                                        System.out.println("please hold while we contact the server.");
+                                        os.writeObject(viewHistoryPacket);
+                                        packetToRecive =(ServerResponse) is.readObject();
+                                        System.out.println(packetToRecive.getResponse());
+                                        continue inner;
+
                                     default:
                                         System.out.println("error in your option try again ");
                                         break;
@@ -205,6 +241,7 @@ public class PaymentClient
                         os.writeObject(packetToSend);
                         System.out.println("come visit us again soon BYE. ");
                         break outer;
+
                 }
             }
 
@@ -220,7 +257,7 @@ public class PaymentClient
         catch (IOException ex)
         {
             //3
-            //   System.out.println("config file does not exist please confirm with our support team");
+            // System.out.println("config file does not exist please confirm with our support team");
         }
         catch (Exception e)
         {

@@ -126,7 +126,7 @@ public class DBController {
         Connection con=createConnection();
         PreparedStatement idPreparedStatement = null;
         ResultSet idResutlRet = null;
-        String idQuery = "SELECT * FROM History WHERE ID = ?";
+        String idQuery = "SELECT * FROM History WHERE AccountID = ?";
         // Make idQuery as prepared statement
         idPreparedStatement = con.prepareStatement(idQuery);
         // Set ID Value
@@ -135,7 +135,7 @@ public class DBController {
         idResutlRet = idPreparedStatement.executeQuery();
         String string = new String();
         while (idResutlRet.next()) {
-            string += (idResutlRet.getString(1) + "\n");
+            string += (idResutlRet.getString(2) + "\n");
         }
         con.close();
         return string;
