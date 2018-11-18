@@ -9,7 +9,14 @@ public class Packet implements Serializable {
     private Account account;
     private Transaction transaction;
     private  command command ;
+    private Boolean fromServer=false;
 
+    public Packet(Account account, Transaction transaction, Packet.command command,Boolean fromServer) {
+        this.account = account;
+        this.transaction = transaction;
+        this.command = command;
+        this.fromServer=fromServer;
+    }
     public Packet(Account account, Transaction transaction, Packet.command command) {
         this.account = account;
         this.transaction = transaction;
@@ -21,6 +28,11 @@ public class Packet implements Serializable {
     public Packet(Account account, Packet.command command) {
         this.account = account;
         this.command = command;
+    }
+    public Packet(Account account, Packet.command command,Boolean fromServer) {
+        this.account = account;
+        this.command = command;
+        this.fromServer=fromServer;
     }
 
 
@@ -42,6 +54,10 @@ public class Packet implements Serializable {
 
     public Transaction getTransaction() {
         return transaction;
+    }
+
+    public Boolean getFromServer() {
+        return fromServer;
     }
 
     public void setTransaction(Transaction transaction) {
