@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 public class Packet implements Serializable {
 
-    enum command {REGISTER, LOGIN, LOGOUT, BALANCE, OPERATION};
+    enum command {REGISTER, LOGIN, LOGOUT, BALANCE, OPERATION,VIEWHISTORY};
 
     private Account account;
     private Transaction transaction;
