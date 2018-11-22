@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 public class Transaction implements Serializable {
 
-    enum operation {   WITHDRAW  , DEPOSIT , DEPOSITFROMANOTHERBANK, TRANSFERTOSAMEBANK , TRANSFERTOANOTHERBANK    } ;
+    enum operation {   WITHDRAW  , DEPOSIT , TRANSFERTOSAMEBANK , TRANSFERTOANOTHERBANK    } ;
 
     private int source ;
     private int destination ;
@@ -42,18 +42,22 @@ public class Transaction implements Serializable {
         switch (operation)
         {
             case WITHDRAW:
-                printStirng = "Account no. = "+ Integer.toString(source)+"Withdraw an amount of money of Value = "+Integer.toString(value) +"from his account.";
+                if(source!=destination)
+                {
+                    printStirng = "Account no. = "+ Integer.toString(source)+" transfer an amount of money of value = "+Integer.toString(value) +" from his account to account no. ="+Integer.toString(destination)+"in another bank.";
+                    break;
+                }
+                printStirng = "Account no. = "+ Integer.toString(source)+" withdrawn an amount of money of value = "+Integer.toString(value) +" from his account.";
                 break;
             case DEPOSIT:
-                printStirng = "Account no. = "+ Integer.toString(source)+"Deposited an amount of money of Value = "+Integer.toString(value) +"to his account.";
+                printStirng = "Account no. = "+ Integer.toString(source)+" deposited an amount of money of value = "+Integer.toString(value) +" to his account.";
                 break;
             case TRANSFERTOSAMEBANK:
-                printStirng = "Account no. = "+ Integer.toString(source)+"Deposited an amount of money of Value = "+Integer.toString(value)
-                        +"to another account whose id is "+Integer.toString(destination);
+                printStirng = "Account no. = "+ Integer.toString(source)+" deposited an amount of money of value = "+Integer.toString(value)
+                        +" to account no. = "+Integer.toString(destination);
                 break;
             case TRANSFERTOANOTHERBANK:
-            case DEPOSITFROMANOTHERBANK:
-                printStirng = "Account no. = "+ Integer.toString(source)+"Deposited an amount of money of Value = "+Integer.toString(value) +"to Account no. = "+Integer.toString(source)+"  ." ;
+                printStirng = "Account no. = "+ Integer.toString(destination)+" deposited an amount of money of value = "+Integer.toString(value) +" to account no. = "+Integer.toString(source)+"." ;
                 break;
         }
 

@@ -5,12 +5,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.sql.*;
 import java.util.Scanner;
-
-import static com.company.DBController.createConnection;
-import static com.company.DBController.createStatement;
-import static com.company.DBController.register;
 
 public class PaymentServer
 {

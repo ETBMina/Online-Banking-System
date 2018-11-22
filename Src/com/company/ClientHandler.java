@@ -3,9 +3,7 @@ package com.company;
 import java.io.File;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.ServerSocket;
 import java.net.Socket;
-import java.sql.*;
 import java.util.Scanner;
 
 import static com.company.DBController.*;
@@ -32,12 +30,6 @@ public class ClientHandler  implements Runnable
 
             ObjectOutputStream os = new ObjectOutputStream(c.getOutputStream());
             ObjectInputStream  is = new ObjectInputStream(c.getInputStream());
-            //    DataOutputStream dos = new DataOutputStream(c.getOutputStream());
-            //    DataInputStream dis = new DataInputStream(c.getInputStream());
-
-            //to connect to DB
-            /*Connection conn=createConnection();
-            Statement stmt = createStatement(conn);*/
             Packet recivedPacket = new Packet();
             ServerResponse serverResponsed = new ServerResponse();
 
@@ -49,35 +41,35 @@ public class ClientHandler  implements Runnable
                 switch (recivedPacket.getCommand())
                 {
                     case REGISTER:
-                        int id = DBController.register(recivedPacket.getAccount());
+                        int id = register(recivedPacket.getAccount());
+                        Transaction initialTransaction=new Transaction(id,id,recivedPacket.getAccount().getBalance(),Transaction.operation.DEPOSIT);
+                        addToHistory(initialTransaction);
                         if(id!=-1)
                         {
                             serverResponsed = new ServerResponse(  "you are now Registered and your id is "
                                     + id , true );
                             os.writeObject(serverResponsed);
-                            //          dos.writeUTF("congratulations you have successfully registered");
+
                         }
                         else
                         {
                             serverResponsed = new ServerResponse("registration failed", false);
                             os.writeObject(serverResponsed);
-                            //dos.writeUTF("your registration was NOT successful");;
                         }
                         continue outer;
                     case LOGIN:
-                        //statusLogin sLI = DBController.login(recivedPacket.getAccount());
+
                         statusLogin sLI;
                         if(recivedPacket.getFromServer()==true)
                         {
                             sLI=statusLogin.CORRECT;
                         }
                         else
-                            sLI=DBController.login(recivedPacket.getAccount());
+                            sLI= login(recivedPacket.getAccount());
 
                         switch (sLI)
                         {
                             case WRONGID:
-                                // dos.writeUTF("WRONG ID TRY TO LOG AGAIN");
                                 serverResponsed = new ServerResponse(  "WRONG ID TRY TO LOG AGAIN" , false );
                                 os.writeObject(serverResponsed);
                                 continue outer;
@@ -85,17 +77,16 @@ public class ClientHandler  implements Runnable
                             {
                                 serverResponsed = new ServerResponse(  "you are now logged in" , true );
                                 os.writeObject(serverResponsed);
-                                //
-                                //             dos.writeUTF("you are now logged in")
+
                                 inner:
                                 while(true ) {
                                     Packet packet =(Packet) is.readObject();
-                                    //System.out.println(packet.getCommand());
+
                                     switch (packet.getCommand())
                                     {
 
                                         case BALANCE:
-                                            Account account=DBController.readAccount(packet.getAccount().getUser_id() );
+                                            Account account= readAccount(packet.getAccount().getUser_id() );
                                             packet.setAccount(account);
                                             os.writeObject(packet);
                                             continue inner;
@@ -153,28 +144,33 @@ public class ClientHandler  implements Runnable
                                                     int sourceID=packet.getTransaction().getSource();
                                                     int destinationID=packet.getTransaction().getDestination();
                                                     int value=packet.getTransaction().getValue();
-                                                    Transaction innerWithdrawTransaction=new Transaction(sourceID,sourceID,value, Transaction.operation.WITHDRAW);
-                                                    Transaction outerDebositTransaction=new Transaction(destinationID,destinationID,value, Transaction.operation.DEPOSIT);
+                                                    Transaction innerWithdrawTransaction=new Transaction(sourceID,destinationID,value, Transaction.operation.WITHDRAW);
+                                                    Transaction outerDebositTransaction=new Transaction(destinationID,sourceID,value, Transaction.operation.DEPOSIT);
                                                     if(readAccount(sourceID).getBalance()>=value)
                                                     {
                                                         Packet packetToSend=new Packet(new Account(),outerDebositTransaction, Packet.command.LOGIN,true);
                                                         outStream.writeObject(packetToSend);
                                                         responseFromAnotherBank=(ServerResponse)inStream.readObject();
-                                                        //System.out.println(responseFromAnotherBank.getResponse());
-                                                        packetToSend = new Packet(new Account(),outerDebositTransaction, Packet.command.OPERATION,true);
-                                                        outStream.writeObject(packetToSend);
-                                                        responseFromAnotherBank=(ServerResponse)inStream.readObject();
                                                         if(responseFromAnotherBank.isSucces()==true)
                                                         {
-                                                            Account.editBalance(innerWithdrawTransaction);
-                                                            transferToAnotherBankResponse.setResponse("Transfer Complete");
+                                                            //System.out.println(responseFromAnotherBank.getResponse());
+                                                            packetToSend = new Packet(new Account(),outerDebositTransaction, Packet.command.OPERATION,true);
+                                                            outStream.writeObject(packetToSend);
+                                                            responseFromAnotherBank=(ServerResponse)inStream.readObject();
+                                                            if(responseFromAnotherBank.isSucces()==true)
+                                                            {
+                                                                Account.editBalance(innerWithdrawTransaction);
+                                                                transferToAnotherBankResponse.setResponse("Transfer Complete");
+                                                            }
+                                                            else
+                                                            {
+                                                                transferToAnotherBankResponse.setResponse("Transfer Failed");
+                                                            }
                                                         }
                                                         else
                                                         {
-                                                            transferToAnotherBankResponse.setResponse("Transfer Failed");
+                                                            transferToAnotherBankResponse.setResponse("Wrong Destination ID");
                                                         }
-
-                                                        //System.out.println(responseFromAnotherBank.getResponse());
 
                                                     }
                                                     else
@@ -204,7 +200,7 @@ public class ClientHandler  implements Runnable
                                             continue inner;
                                         case VIEWHISTORY:
                                             // Recieve packet
-                                            String History = DBController.viewHistory(recivedPacket.getAccount());
+                                            String History = viewHistory(recivedPacket.getAccount());
                                             //System.out.println("view History output : "+History);
 
 

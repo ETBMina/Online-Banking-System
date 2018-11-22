@@ -25,7 +25,7 @@ public class DBController {
                 connection = DriverManager.getConnection("jdbc:sqlite:server2DB.db");
             }
         } catch (SQLException e) {
-            System.out.println("Something went wromg: " + e.getMessage());
+            System.out.println("Something went wromg: fail in create connection" + e.getMessage());
         }
         return connection;
     }
@@ -34,7 +34,7 @@ public class DBController {
         try {
             stmt  = connection.createStatement();
         } catch (SQLException e) {
-            System.out.println("Something went wromg: " + e.getMessage());
+            System.out.println("Something went wromg: fail in create statement " + e.getMessage());
         }
         return stmt;
     }
@@ -55,13 +55,9 @@ public class DBController {
                     hashedPass +"' , '"+
                     Integer.toString(account.getBalance())+"')";
             stmt.execute(sql);
-           /* ResultSet rs = stmt.executeQuery( "SELECT * FROM Accounts WHERE NAME='"+
-                    account.getFull_name()+"' AND BALANCE='"+
-                    Integer.toString(account.getBalance())+"'");*/
             ResultSet rs = stmt.executeQuery( "select * from Accounts WHERE ID=(SELECT MAX(ID) from Accounts)");
 
             while ( rs.next() ) {
-              //  if (BCrypt.checkpw(Integer.toString(account.getPassword()), hashedPass))
                 int ret=rs.getInt("ID");
                 conn.close();
                     return ret;
@@ -70,7 +66,7 @@ public class DBController {
 
             return -1;
         } catch (SQLException e) {
-            System.out.println("Something went wrong: " + e.getMessage());
+            System.out.println("Something went wrong: Cann't register" + e.getMessage());
             return -1;
         }
 
@@ -121,14 +117,15 @@ public class DBController {
         Statement stmt= createStatement(con);
         String SQL="CREATE TABLE IF NOT EXISTS History " +
                 "(ID INTEGER PRIMARY KEY AUTOINCREMENT," +
+                "AccountID INTEGER NOT NULL,"+
                 "DESCRIPTION TEXT NOT NULL )";
         String timeStamp = new SimpleDateFormat("yyyy/MM/dd_HH:mm:ss").format(Calendar.getInstance().getTime());
         String transactionDescription=timeStamp+" ::"+transaction.toString();
 
         try {
             stmt.execute(SQL);
-            SQL="INSERT INTO History(DESCRIPTION) " +
-                    "VALUES ('"+transactionDescription+"')";
+            SQL="INSERT INTO History(AccountID,DESCRIPTION) " +
+                    "VALUES ('"+transaction.getSource()+"' , '"+transactionDescription+"')";
             stmt.execute(SQL);
             con.close();
         } catch (SQLException e) {
@@ -150,7 +147,7 @@ public class DBController {
         idResutlRet = idPreparedStatement.executeQuery();
         String string = new String();
         while (idResutlRet.next()) {
-            string += (idResutlRet.getString(2) + "\n");
+            string += (idResutlRet.getString(3) + "\n");
         }
         con.close();
         return string;
@@ -166,13 +163,11 @@ public class DBController {
             stmt.execute(SQL);
             con.close();
         } catch (SQLException e) {
-            System.out.println("Something went wrong:x " + e.getMessage());
+            System.out.println("Something went wrong:Cann't edit the balance " + e.getMessage());
         }
 
         return;
     }
-
-
 
 
 
@@ -233,8 +228,6 @@ public class DBController {
                 return false;
             }
             else {
-                //   int balance=idResutlRet.getInt("BALANCE");
-                // account.setBalance(balance);
                 con.close();
                 return true;
             }
