@@ -120,8 +120,6 @@ public class Account implements Serializable {
                 //making the transaction
                 destination.setBalance(destination.getBalance()+trans.getValue());
                 source.setBalance(source.getBalance()-trans.getValue());
-                //System.out.println("Source Balance : "+source.getBalance());
-                //System.out.println("Destination Balance :"+destination.getBalance());
                 //updating the data base
                 DBController.editBalance(source);
                 DBController.editBalance(destination);

@@ -3,8 +3,6 @@ package com.company;
 
 import java.io.*;
 import java.net.Socket;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Scanner;
 
 public class PaymentClient
@@ -28,6 +26,7 @@ public class PaymentClient
             while(true)
             {
                 System.out.println("Enter 1 to connect to the first server or 2 to connect to the second:");
+
                 serverNo=sc.nextInt();
                 if(serverNo==1)
                 {
@@ -82,13 +81,13 @@ public class PaymentClient
                             continue outer;
                         }
                         //taking password in and checking for error
-                        System.out.println("Enter your PASSWORD :");
+                        //System.out.println("Enter your PASSWORD :");
                         String password="";
-                        /*
+
                         Console console = System.console();
-                        char[] text = console.readPassword("To finish, enter password: ");
-                        password=String.valueOf(text);*/
-                        password = sc.nextLine();
+                        char[] text = console.readPassword("Enter password : ");
+                        password=String.valueOf(text);
+                        //password = sc.nextLine();
 
                         if(!checkUserPassword(password)) {
                             System.out.println("INVALID PASSWORD .");
@@ -188,9 +187,7 @@ public class PaymentClient
                                             else if (Integer.parseInt(anotherValue) == account.getUser_id())
                                                 System.out.println("you can't transfer to your account");
                                             else {
-                                                //System.out.println(anotherAccount.getUser_id()+" is id");
                                                 anotherAccount.setUser_id(Integer.parseInt(anotherValue));
-                                                System.out.println(anotherAccount.getUser_id() + " is id");
                                                 Transaction trans = new Transaction(account.getUser_id(), anotherAccount.getUser_id(), Integer.parseInt(value), Transaction.operation.TRANSFERTOSAMEBANK);
                                                 Packet DepositPacket = new Packet(packetToSend.getAccount(), trans, Packet.command.OPERATION);
                                                 System.out.println("please hold while we contact the server.");
@@ -252,17 +249,6 @@ public class PaymentClient
                                 }
 
 
-
-                                //////////////////////////////////////////////here//////////////////////////////////
-
-
-
-
-
-
-
-
-
                             }
 
                         continue outer;
@@ -274,8 +260,9 @@ public class PaymentClient
                         //taking in password
                         String pass = "";
                         do {
-                            System.out.println("Enter your PASSWORD : (Must consist of 4 digits only)  ");
-                            pass = sc.nextLine();
+                            console = System.console();
+                            text = console.readPassword("Enter your PASSWORD(Must consist of 4 digits only):  ");
+                            pass=String.valueOf(text);
                             if (!checkUserPassword(pass))
                                 System.out.println("INVALID PASSWORD  try  again");
                         }while(!checkUserPassword(pass));
@@ -307,29 +294,18 @@ public class PaymentClient
             }
 
             System.exit(0) ;
-            //close comm
             os.close();
             is.close();
-            // dis.close();
-            // dos.close();
-            //close socket for client
             c.close();
         }
         catch (IOException ex)
         {
-            //3
-            //   System.out.println("config file does not exist please confirm with our support team");
+              System.out.println("config file does not exist please confirm with our support team");
         }
         catch (Exception e)
         {
             e.printStackTrace();
         }
-    }
-    public static String readFileAsString(String fileName)throws Exception
-    {
-        String data = "";
-        data = new String(Files.readAllBytes(Paths.get(fileName)));
-        return data;
     }
     public static boolean checkUserIpForFirstOption ( String ip )
     {

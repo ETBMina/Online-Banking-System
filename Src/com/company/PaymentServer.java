@@ -1,10 +1,9 @@
 package com.company;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Scanner;
 
 public class PaymentServer
@@ -45,14 +44,8 @@ public class PaymentServer
                     continue outer;
                 }
             }
-
             DBController.setDatabaseSelector(serverNo);
             //create socket
-            //String data = readFileAsString("ServerPortNo.txt");
-            //ServerSocket s = new ServerSocket(Integer.parseInt(data));
-            //ServerSocket s = new ServerSocket(1234);
-            // number of clients
-            int n = 1 ;
             //greeting at server
             System.out.println("The server is ready to accept clients ");
 
@@ -64,33 +57,14 @@ public class PaymentServer
                 //handle clients in parallel
                 Thread t = new Thread(ch);
                 t.start();
-                //create new light weight process
-                //and run in parallel and the main thread
-                //continues
-                n++;
+
             }
-            //s.close();
         }
         catch (IOException e) {
             e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-    public static void connectToOtherServer()
-    {
-
-    }
-    public static boolean sendPacketToOtherServerAndGetResponse( Transaction trans )
-    {
-
-        return true ;
-    }
-    public static String readFileAsString(String fileName)throws Exception
-    {
-        String data = "";
-        data = new String(Files.readAllBytes(Paths.get(fileName)));
-        return data;
     }
 
 }

@@ -153,7 +153,6 @@ public class ClientHandler  implements Runnable
                                                         responseFromAnotherBank=(ServerResponse)inStream.readObject();
                                                         if(responseFromAnotherBank.isSucces()==true)
                                                         {
-                                                            //System.out.println(responseFromAnotherBank.getResponse());
                                                             packetToSend = new Packet(new Account(),outerDebositTransaction, Packet.command.OPERATION,true);
                                                             outStream.writeObject(packetToSend);
                                                             responseFromAnotherBank=(ServerResponse)inStream.readObject();
@@ -201,28 +200,15 @@ public class ClientHandler  implements Runnable
                                         case VIEWHISTORY:
                                             // Recieve packet
                                             String History = viewHistory(recivedPacket.getAccount());
-                                            //System.out.println("view History output : "+History);
-
-
                                             serverResponsed = new ServerResponse(  "Your Transaction History is : \n"+History, true );
                                             os.writeObject(serverResponsed);
-                                            //          dos.writeUTF("congratulations you have successfully registered");
                                             continue inner;
+
+
                                         default:
                                             continue inner;
 
-
-
-
-
-
-
                                     }
-
-
-
-
-                                    ////////////////////////////here/////////////////////////////////////
                                 }
 
                             }
@@ -230,15 +216,11 @@ public class ClientHandler  implements Runnable
                                 serverResponsed = new ServerResponse
                                         (  "WRONG PASSWORD TRY TO LOG in AGAIN" , false );
                                 os.writeObject(serverResponsed);
-                                //               dos.writeUTF("WRONG PASSWORD TRY TO LOG AGAIN");
                                 continue outer;
                         }
 
-/***********************************************************************************************/
-                        //continue outer;
                     case LOGOUT:
                         break outer;
-
                 }
             }
         }
@@ -247,6 +229,5 @@ public class ClientHandler  implements Runnable
             System.out.println("Something went wrong "+e.getMessage());
         }
         System.out.println("A Client just left ");
-        //    System.out.println("client number " +n + "just left");
     }
 }
